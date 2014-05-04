@@ -1,8 +1,7 @@
 /* Public Domain.  See the LICENSE file. */
 
-/* A simple program to generate pythagorean triples.   */
+/* A simple program to generate Pythagorean triples.   */
 /* ie.  Integer solutions to:  a^2 + b^2 = c^2         */
-/*      where GCD(a,b,c) = 1                           */
 
 /* To compile, the GMP library needs to be already installed.    */
 /* See https://gmplib.org                                        */
@@ -39,15 +38,15 @@ int main( int argc, char * argv[] ) {
     printf("\n");
     printf("For a^2 + b^2 = c^2 :\n");
     printf("\n");
-    printf("Usage: ptriples [-a] c_min c_max\n\n");
-    printf("Options:\n");
-    printf("  -a -- all pythagorean triples (not just primitives)\n\n");
+    printf("Usage: ptriples [-p] c_min c_max\n\n\n");
+    printf("Options:\n\n");
+    printf("  -p -- primitive triples only\n\n");
     return 1;
   }
 
-  int DoAllTriples = 0;
-  if ( argc == 4 && strcmp( argv[1], "-a" ) == 0 )
-    DoAllTriples = 1;
+  int DoOnlyPrimitives = 0;
+  if ( argc == 4 && strcmp( argv[1], "-p" ) == 0 )
+    DoOnlyPrimitives = 1;
 
   mpz_t user_c_min;
   mpz_init_set_str( user_c_min,  argv[argc == 3 ? 1 : 2], 10 );
@@ -70,10 +69,10 @@ int main( int argc, char * argv[] ) {
   }
 
   mpz_t working_c_min;
-  if ( DoAllTriples )
-    mpz_init_set_ui( working_c_min, 1 );
-  else
+  if ( DoOnlyPrimitives )
     mpz_init_set( working_c_min, user_c_min );
+  else
+    mpz_init_set_ui( working_c_min, 1 );
 
 
   // We are going to use Euclid's formula:
@@ -186,7 +185,9 @@ int main( int argc, char * argv[] ) {
       if ( mpz_cmp( c, user_c_max ) > 0 )
         continue;
 
-      if ( DoAllTriples ) {
+      if ( DoOnlyPrimitives )
+        AddPTriple( &triples, a, b, c );
+      else {
         // iterate through k in: (k*a)^2 + (k*b)^2 = (k*c)^2
         mpz_fdiv_q( k, user_c_min, c );
 
@@ -201,8 +202,6 @@ int main( int argc, char * argv[] ) {
           AddPTriple( &triples, ka, kb, kc );
         }
       }
-      else
-        AddPTriple( &triples, a, b, c );
     }
   }
 
