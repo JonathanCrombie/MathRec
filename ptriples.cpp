@@ -289,8 +289,6 @@ int ttable_entry_cmpfunc( const void* p1, const void* p2 ) {
   int cmpval = mpz_cmp( entry1->c, entry2->c );
   if ( cmpval == 0 )
       cmpval = mpz_cmp( entry1->b, entry2->b );
-  if ( cmpval == 0 )
-      cmpval = mpz_cmp( entry1->c, entry2->c );
 
   return cmpval;
 }
