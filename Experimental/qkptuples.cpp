@@ -166,8 +166,8 @@ void BuildNTuples( struct ttable* tuples, int DoOnlyPrimitives, mpz_t b_min, mpz
   for ( i = 0; i < threetuple.count; i++ ) {
     if ( mpz_cmp( threetuple.tuples[i].b, b_min ) >= 0 ) {
       mpz_t* avalues = (mpz_t*)calloc( 2, sizeof( mpz_t ) );
-      mpz_set( avalues[0], threetuple.tuples[i].a[0] );
-      mpz_set( avalues[1], threetuple.tuples[i].a[1] );
+      mpz_init_set( avalues[0], threetuple.tuples[i].a[0] );
+      mpz_init_set( avalues[1], threetuple.tuples[i].a[1] );
       MovePTuple( onesmaller_table, avalues, 2, threetuple.tuples[i].b );
     }
   }
