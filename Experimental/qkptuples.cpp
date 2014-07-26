@@ -38,6 +38,7 @@ void AddPTriple( struct ttable*, mpz_t, mpz_t, mpz_t );
 void MovePTuple( struct ttable*, mpz_t*, long, mpz_t );
 void RemDupTuples( struct ttable* );
 int CheckForDuplicateTuple( mpz_t*, mpz_t*, long );
+long NumDupsAhead( struct ttable*, long );
 int TupleIsPrimitive( mpz_t*, mpz_t, long );
 long GetFirstBIndex( struct ttable*, mpz_t );
 void Cleanup_ttable( struct ttable* );
@@ -453,22 +454,32 @@ void RemDupTuples( struct ttable* the_table ) {
   new_table.count = 0;
   new_table.tuples = NULL;
 
+  long skip = 0;
   long i;
-  for ( i = 0; i < the_table->count; i++ ) {
-    int IsDuplicateTuple = 0;
-    if ( i > 0 )
-      IsDuplicateTuple = CheckForDuplicateTuple( the_table->tuples[i-1].a, the_table->tuples[i].a, the_table->tuples[i-1].a_count );
-
-    if ( !IsDuplicateTuple ) {
-      MovePTuple( &new_table, the_table->tuples[i].a, the_table->tuples[i].a_count, the_table->tuples[i].b );
-      the_table->tuples[i].a_count = 0;
-      the_table->tuples[i].a = NULL;
-    }
+  for ( i = 0; i < the_table->count; i += skip + 1 ) {
+    skip = NumDupsAhead( the_table, i ); 
+    MovePTuple( &new_table, the_table->tuples[i].a, the_table->tuples[i].a_count, the_table->tuples[i].b );
+    the_table->tuples[i].a_count = 0;
+    the_table->tuples[i].a = NULL;
   }
 
   Cleanup_ttable( the_table );
   the_table->count = new_table.count;
   the_table->tuples = new_table.tuples;
+}
+
+long NumDupsAhead( struct ttable* the_table, long curindex ) {
+
+  long DupCount = 0;
+
+  long i = curindex;
+  while ( i < the_table->count-1 &&
+          CheckForDuplicateTuple( the_table->tuples[i].a, the_table->tuples[i+1].a, the_table->tuples[i].a_count ) ) {
+    i++;
+    DupCount++;
+  }
+
+  return DupCount;
 }
 
 int TupleIsPrimitive( mpz_t* avalues, mpz_t b, long acount) {
