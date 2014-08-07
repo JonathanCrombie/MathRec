@@ -6,8 +6,17 @@
 /* There are no dependencies.  To compile on linux,  */
 /* try: gcc fractals.cpp -o fractals                 */
 
+/* Using Visual C++ in Windows, the following        */
+/* worked from a command prompt: cl fractals.cpp     */
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
@@ -23,10 +32,18 @@ void printusage();
 int Get2Tuple( char*, double*, double* );
 int Get2Tuple( char*, long*, long* );
 void initpal(struct pixel *);
+
+const char* VersionStr = "1.0.1";
 const unsigned char CRLF[2] = {0x0D,0x0A};
-const char* VersionStr = "1.0.0";
 
 int main( int argc, char* argv[] ) {
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+ if ( _setmode( _fileno( stdout ), _O_BINARY ) == -1 ) {
+    printf( "Cannot set stdout to binary mode.  Exiting." );
+    return -1;
+ }
+#endif
 
   char*     userfilename = NULL;
   int       user_capk    = -1;
@@ -68,7 +85,7 @@ int main( int argc, char* argv[] ) {
         break;
        case 'h':
         printusage();
-        exit(EXIT_SUCCESS);
+        return 0;
         break;
        case 'j':  // julia set constant value (the real part and imaginary part)
         if ( optionvalue == NULL && nextlen > 0 ) {
@@ -104,7 +121,7 @@ int main( int argc, char* argv[] ) {
         break;
        case 'v':
         printf( "fractals version %s\n", VersionStr );
-        exit(EXIT_SUCCESS);
+        return 0;
         break;
        case 'z':
         if ( optionvalue == NULL && nextlen > 0 ) {
@@ -152,13 +169,13 @@ int main( int argc, char* argv[] ) {
       printf("Output file \"%s\" already exists.  Refusing to overwrite.  Exiting.\n\n", userfilename );
       fclose( fdtest );
       free( userfilename );
-      exit( EXIT_FAILURE );
+      return -1;
     }
     fpout = fopen( userfilename, "wb" );
     if ( fpout == NULL ) {
       printf("Error: Could not open file \"%s\" for write.  Exiting.\n\n", userfilename );
       free( userfilename );
-      exit( EXIT_FAILURE );
+      return -1;
     }
   }
 
@@ -245,7 +262,7 @@ int main( int argc, char* argv[] ) {
     userfilename = NULL;
   }
 
-  exit( EXIT_SUCCESS );
+  return 0;
 }
 
 void printusage() {
